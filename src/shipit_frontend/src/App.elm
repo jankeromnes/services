@@ -15,12 +15,8 @@ import Utils
 import App.Utils exposing (eventLink)
 import App.Home as Home
 import App.ReleaseDashboard as ReleaseDashboard
-
-
-type Page
-    = Home
-    | ReleaseDashboard
-    | Bugzilla
+import App.Types
+import App.Pipeline
 
 
 type
@@ -31,8 +27,9 @@ type
     | HomeMsg Home.Msg
     | HawkRequest Hawk.Msg
       -- App code
-    | ShowPage Page
+    | ShowPage App.Types.Page
     | ReleaseDashboardMsg ReleaseDashboard.Msg
+    | PipelineMsg App.Pipeline.Msg
 
 
 type alias Role =
@@ -47,7 +44,7 @@ type alias Model =
     , bugzilla :
         Bugzilla.Model
         -- App code
-    , current_page : Page
+    , current_page : App.Types.Page
     , release_dashboard : ReleaseDashboard.Model
     }
 
@@ -77,7 +74,7 @@ init flags =
         model =
             { bugzilla = bz
             , user = user
-            , current_page = Home
+            , current_page = App.Types.Home
             , release_dashboard = dashboard
             }
     in
@@ -161,9 +158,14 @@ update msg model =
                 ( dashboard, cmd ) =
                     ReleaseDashboard.update dashMsg model.release_dashboard model.user model.bugzilla
             in
-                ( { model | release_dashboard = dashboard, current_page = ReleaseDashboard }
+                ( { model | release_dashboard = dashboard, current_page = App.Types.ReleaseDashboard }
                 , Cmd.map ReleaseDashboardMsg cmd
                 )
+
+        PipelineMsg pipelineMsg ->
+            -- Does nothing
+            ( model, Cmd.none )
+
 
 
 loadAllAnalysis : Model -> Cmd Msg
@@ -188,20 +190,11 @@ view model =
         [ nav [ class "navbar navbar-toggleable-md navbar-inverse bg-inverse" ]
             (viewNavBar model)
         , div [ id "content" ]
-            [ case model.user of
-                Just user ->
-                    div [ class "container-fluid" ]
-                        [ viewDashboardStatus model.release_dashboard
-                        , viewPage model
-                        ]
-
-                Nothing ->
-                    div [ class "container" ]
-                        [ div [ class "alert alert-warning" ]
-                            [ text "Please login first."
-                            ]
-                        ]
-            ]
+              [ div [ class "container-fluid" ]
+                    [ viewDashboardStatus model.release_dashboard
+                    , viewPage model
+                    ]
+              ]
         , viewFooter
         ]
 
@@ -209,14 +202,17 @@ view model =
 viewPage : Model -> Html Msg
 viewPage model =
     case model.current_page of
-        Home ->
+        App.Types.Home ->
             Html.map HomeMsg (Home.view model)
 
-        Bugzilla ->
+        App.Types.Bugzilla ->
             Html.map BugzillaMsg (Bugzilla.view model.bugzilla)
 
-        ReleaseDashboard ->
+        App.Types.ReleaseDashboard ->
             Html.map ReleaseDashboardMsg (ReleaseDashboard.view model.release_dashboard model.bugzilla)
+
+        App.Types.Pipeline ->
+            Html.map PipelineMsg (App.Pipeline.view model)
 
 
 viewNavBar : Model -> List (Html Msg)
@@ -229,9 +225,9 @@ viewNavBar model =
         , attribute "aria-controls" "navbar-header"
         ]
         [ text "Menu" ]
-    , pageLink Home
+    , pageLink App.Types.Home
         [ class "navbar-brand" ]
-        [ text "Uplift Dashboard" ]
+        [ text "ShipIt v2" ]
     , div [ class "collapse navbar-collapse" ]
         [ ul [ class "navbar-nav mr-auto " ] (viewNavDashboard model)
         , ul [ class "navbar-nav" ] (viewUser model)
@@ -297,7 +293,7 @@ viewBugzillaCreds bugzilla =
 
 viewLoginBugzilla : List (Html Msg)
 viewLoginBugzilla =
-    [ eventLink (ShowPage Bugzilla) [ class "nav-link" ] [ text "Login Bugzilla" ]
+    [ eventLink (ShowPage App.Types.Bugzilla) [ class "nav-link" ] [ text "Login Bugzilla" ]
     ]
 
 
@@ -386,7 +382,7 @@ viewLogin =
         , href "#"
         , class "nav-link"
         ]
-        [ text "Login TaskCluster" ]
+        [ text "Login" ]
     ]
 
 
@@ -427,7 +423,7 @@ viewDropdown title pages =
 -- Routing
 
 
-pageLink : Page -> List (Attribute Msg) -> List (Html Msg) -> Html Msg
+pageLink : App.Types.Page -> List (Attribute Msg) -> List (Html Msg) -> Html Msg
 pageLink page attributes =
     eventLink (ShowPage page) attributes
 
@@ -456,12 +452,16 @@ location2messages location =
                                         |> User.Logging
                                         |> UserMsg
                                 )
-                            |> Maybe.withDefault (ShowPage Home)
-                        , ShowPage Home
+                            |> Maybe.withDefault (ShowPage App.Types.Home)
+                        , ShowPage App.Types.Home
                         ]
 
                     "bugzilla" ->
-                        [ ShowPage Bugzilla
+                        [ ShowPage App.Types.Bugzilla
+                        ]
+
+                    "pipeline" ->
+                        [ ShowPage App.Types.Pipeline
                         ]
 
                     "release-dashboard" ->
@@ -488,20 +488,20 @@ location2messages location =
                             -- No sub query parts
                         in
                             -- Finish by showing the page
-                            messages ++ [ ShowPage ReleaseDashboard ]
+                            messages ++ [ ShowPage App.Types.ReleaseDashboard ]
 
                     _ ->
-                        [ ShowPage Home ]
+                        [ ShowPage App.Types.Home ]
 
             _ ->
-                [ ShowPage Home ]
+                [ ShowPage App.Types.Home ]
 
 
 delta2url : Model -> Model -> Maybe UrlChange
 delta2url previous current =
     Maybe.map Builder.toUrlChange <|
         case current.current_page of
-            ReleaseDashboard ->
+            App.Types.ReleaseDashboard ->
                 let
                     path =
                         case current.release_dashboard.current_analysis of
@@ -515,9 +515,14 @@ delta2url previous current =
                         (Builder.prependToPath path)
                         (Just builder)
 
-            Bugzilla ->
+            App.Types.Bugzilla ->
                 Maybe.map
                     (Builder.prependToPath [ "bugzilla" ])
+                    (Just builder)
+
+            App.Types.Pipeline ->
+                Maybe.map
+                    (Builder.prependToPath [ "pipeline" ])
                     (Just builder)
 
             _ ->
