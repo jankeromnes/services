@@ -14,6 +14,10 @@ pipeline : Pipeline
 pipeline =
     { id = "desktop-firefox-beta"
     , name = "Mozilla Firefox Beta"
+    , description =
+        { mimetype = TextPlain
+        , text = "More details"
+        }
     , steps =
         [ { id = "step-1"
           , name = "Step 1"
@@ -21,8 +25,8 @@ pipeline =
         , { id = "step-2"
           , name = "Step 2"
           }
-        , { id = "step-2"
-          , name = "Step 2"
+        , { id = "step-3"
+          , name = "Step 3"
           }
         ]
     }
@@ -40,8 +44,21 @@ stepsData =
 -- Types
 --
 
+
 type Msg
     = None
+
+
+type MimeType
+   = TextPlain
+   | TextHtml
+   | TextMarkdown
+
+
+type alias RichText =
+    { mimetype : MimeType
+    , text : String
+    }
 
 
 type alias PipelineId =
@@ -51,6 +68,7 @@ type alias PipelineId =
 type alias Pipeline =
     { id : PipelineId
     , name : String
+    , description : RichText
     , steps : List Step
     }
 
@@ -83,6 +101,16 @@ type StepStatus
     | StepPending
 
 
+stepStatusOrder =
+   [ "failed"
+   , "waiting"
+   , "paused"
+   , "running"
+   , "done"
+   , "pending"
+   ]
+
+
 initialStepStatus =
     StepPending
 
@@ -96,12 +124,14 @@ view model =
     let
         stepsByStatus = groupStepsByStatus pipeline.steps stepsData 
     in
-        div [ class "container" ]
+        div [ class "container"
+            , id "pipeline"
+            ]
             (List.append
                 [ h1 [] [ text pipeline.name ]
                 , viewProgress pipeline.steps stepsByStatus
                 , div [ class "text-center" ]
-                      [ a [ href "#" ] [ text "Show in graph" ]
+                      [ a [ href "#" ] [ text "Show as graph" ]
                       ]
                 ]
                 (viewSteps stepsByStatus)
@@ -143,13 +173,7 @@ viewProgressLegend =
         [ class "progress-legend" ] 
         (List.map
            (\x -> li [ class ("progress-legend-" ++ x) ] [ text x ])
-           [ "failed"
-           , "paused"
-           , "waiting"
-           , "running"
-           , "done"
-           , "pending"
-           ]
+           stepStatusOrder
         )
 
 
@@ -168,16 +192,21 @@ viewProgress allSteps stepsByStatus =
 
 viewSteps : Dict.Dict String (List Step) -> List (Html Msg)
 viewSteps stepsByStatus =
-    Dict.toList stepsByStatus
+    stepStatusOrder
+        |> List.map (\x -> (x, Dict.get x stepsByStatus |> Maybe.withDefault []))
         |> List.map viewStepsByStatus
         |> List.concat
 
 
 viewStepsByStatus : (String, List Step) -> List (Html Msg)
 viewStepsByStatus (stepStatus, steps) =
-    [ h2 [] [ text stepStatus ]
-    , div [ class "list-group" ] (List.map viewStep steps)
-    ]
+    if List.length steps == 0
+        then
+            []
+        else
+            [ h2 [] [ text stepStatus ]
+            , div [ class "list-group" ] (List.map viewStep steps)
+            ]
 
 
 viewStep step =
