@@ -117,13 +117,19 @@ viewProgressItem allSteps (stepStatus, steps) =
                 |> toString
                 |> (\x -> "(" ++ x ++ ")")
 
+        percentage =
+            (List.length steps |> toFloat) * 100.0 / (List.length allSteps |> toFloat)
+
         title =
             String.left 1 stepStatus
                 |> String.toUpper
     in
         div
-            [ class "progress-bar "
-            , style [ ("width", "15%"), ("height", "2em"), ("line-height", "2em") ]
+            [ class ("progress-bar progress-bar-" ++ stepStatus)
+            , style [ ("width", (toString percentage) ++ "%")
+                    , ("height", "2em")
+                    , ("line-height", "2em")
+                    ]
             , attribute "role" "progressbar"
             , attribute "aria-valuenow" "15"
             , attribute "aria-valuemin" "0"
@@ -132,28 +138,55 @@ viewProgressItem allSteps (stepStatus, steps) =
             [ text (title ++ " " ++ stepsCount) ]
 
 
+viewProgressLegend =
+    ul
+        [ class "progress-legend" ] 
+        (List.map
+           (\x -> li [ class ("progress-legend-" ++ x) ] [ text x ])
+           [ "failed"
+           , "paused"
+           , "waiting"
+           , "running"
+           , "done"
+           , "pending"
+           ]
+        )
+
+
+
 viewProgress allSteps stepsByStatus =
-    div [ class "progress" ] (Dict.toList stepsByStatus |> List.map (viewProgressItem allSteps))
+    div
+        []
+        [ viewProgressLegend
+        , div
+            [ class "progress" ]
+            (Dict.toList stepsByStatus |> List.map (viewProgressItem allSteps))
+        ]
+
+
 
 
 viewSteps : Dict.Dict String (List Step) -> List (Html Msg)
 viewSteps stepsByStatus =
     Dict.toList stepsByStatus
-        |> List.map viewStep
+        |> List.map viewStepsByStatus
         |> List.concat
 
 
-viewStep : (String, List Step) -> List (Html Msg)
-viewStep (stepStatus, steps) =
-    [ h2 [ ] [ text stepStatus ]
-    , div [ class "list-group" ] []
+viewStepsByStatus : (String, List Step) -> List (Html Msg)
+viewStepsByStatus (stepStatus, steps) =
+    [ h2 [] [ text stepStatus ]
+    , div [ class "list-group" ] (List.map viewStep steps)
     ]
---    div
---        [ class "list-group-item" ]
---        [ a
---            [ href "#" ]
---            [ text "" ]--step.name ]
---        ]
+
+
+viewStep step =
+    div
+        [ class "list-group-item" ]
+        [ a
+            [ href "#" ]
+            [ text step.name ]
+        ]
     
 
 

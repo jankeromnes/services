@@ -59,6 +59,73 @@ html {
   }
 }
 
+
+.progress-bar-failed {
+  background-color: $dino-red;
+}
+.progress-bar-paused {
+  background-color: $flame-yellow;
+}
+.progress-bar-waiting {
+  background-color: $aurora-purple;
+}
+.progress-bar-running {
+  background-color: $mobile-blue;
+}
+.progress-bar-done {
+  background-color: $gecko-green;
+}
+.progress-bar-pending {
+  background-color: $firefox-orange;
+}
+
+.progress {
+  clear: both;
+}
+
+.progress-legend {
+  list-style: none;
+  margin: 0.5em 0;
+  padding: 0;
+  float: right;
+
+  li {
+    display: inline-block;
+    margin: 0 0 0 1.5em;
+    padding: 0 0 0 0.6em;
+    position: relative;
+
+    &:before {
+        display: block;
+        content: "";
+        width: 0.3em;
+        height: 1.3em;
+        position: absolute;
+        left: 0;
+        top: 0.1em;
+    }
+
+    &.progress-legend-failed:before {
+      background-color: $dino-red;
+    }
+    &.progress-legend-paused:before {
+      background-color: $flame-yellow;
+    }
+    &.progress-legend-waiting:before {
+      background-color: $aurora-purple;
+    }
+    &.progress-legend-running:before {
+      background-color: $mobile-blue;
+    }
+    &.progress-legend-done:before {
+      background-color: $gecko-green;
+    }
+    &.progress-legend-pending:before {
+      background-color: $firefox-orange;
+    }
+  }
+}
+
 nav {
 
   // Bugzilla erroneous login link
