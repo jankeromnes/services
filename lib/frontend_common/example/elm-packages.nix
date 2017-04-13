@@ -11,6 +11,14 @@
     version = "2.0.4";
     sha256 = "13kc3jim6js827h91m6wx6n16qb3b6p6ms6789ks106zpwmhfwxv";
   };
+  "evancz/url-parser" = {
+    version = "2.0.1";
+    sha256 = "0c9vxd7m11mmshlqi3s2arsr4jjkzxqcb907fvamxhaxvygkd4i7";
+  };
+  "etaque/elm-form" = {
+    version = "2.0.0";
+    sha256 = "0dbqjf0ddjhi48gjjc5wz5amzzvbk64dgwnq7g06pawp208bkcbw";
+  };
   "elm-lang/dom" = {
     version = "1.1.1";
     sha256 = "1y6nm3np10l34mhpc9c88vv7kc7qgaxim4cmagf4ig82rwi9mpl1";
@@ -19,25 +27,13 @@
     version = "2.0.0";
     sha256 = "05sqjd5n8jnq4lv5v0ipcg98b8im1isnnl4wns1zzn4w5nbrjjzi";
   };
-  "rgrempel/elm-route-url" = {
-    version = "3.0.0";
-    sha256 = "0rnpkqryzgkcwrbrxnn1aliqazm7ii7dyqg4jgr5iqfkymn4lymy";
-  };
-  "elm-community/json-extra" = {
-    version = "2.1.0";
-    sha256 = "1l5nrjfsynk9ax4hprp56b9in5nqi3prfgjzh4yg3mh4pxk4pf9k";
-  };
   "elm-lang/http" = {
     version = "1.0.0";
     sha256 = "1fh9k278q4i2y447wkk8jd4n12px1nsmycd0fql8k0i3ypcibm8h";
   };
-  "sporto/erl" = {
-    version = "10.0.2";
-    sha256 = "1pkvqmwljvzcbfqxsa2a4gmrh72nyk598wzhbl8ama30wyxm41fa";
-  };
-  "ccapndave/elm-update-extra" = {
-    version = "2.3.1";
-    sha256 = "1ns2kknl8zh8w51f5aq7pf48a5y1yhh40fq3ngx7mry708zlccks";
+  "evancz/focus" = {
+    version = "2.0.2";
+    sha256 = "1680pbkx67cdk1fp7pdciiv00grq86kk15amf30pma9zmysp938p";
   };
   "elm-lang/core" = {
     version = "5.1.1";
