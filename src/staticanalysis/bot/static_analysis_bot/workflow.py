@@ -227,7 +227,10 @@ class Workflow(object):
             # Mark newly found issues
             if settings.publication == Publication.BEFORE_AFTER:
                 for issue in issues:
+                    logger.info('DEBUG computing is_new for issue {}'.format(issue.__str__()))
+                    logger.info('DEBUG looking for {} in {}'.format(issue.__hash__(), [i.__hash__() for i in before_patch]))
                     issue.is_new = issue not in before_patch
+                    logger.info('DEBUG is_new is {}'.format(issue.is_new))
 
         # Avoid duplicates
         issues = set(issues)
