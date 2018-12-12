@@ -226,8 +226,9 @@ class Workflow(object):
 
             # Mark newly found issues
             if settings.publication == Publication.BEFORE_AFTER:
+                before_hashes = set(issue.__hash__() for issue in before_patch)
                 for issue in issues:
-                    issue.is_new = issue not in before_patch
+                    issue.is_new = issue.__hash__() not in before_hashes
 
         # Avoid duplicates
         issues = set(issues)
